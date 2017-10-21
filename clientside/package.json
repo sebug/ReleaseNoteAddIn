@@ -1,0 +1,26 @@
+{
+  "name": "release-note-add-in",
+  "version": "1.0.0",
+  "description": "Add-in that allows to insert release entries in a release note.",
+  "main": "index.js",
+  "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "build": "babel src -d lib && r.js -o app.build.js && cp node_modules/babel-polyfill/dist/polyfill.min.js ."
+  },
+  "keywords": [
+    "word",
+    "add",
+    "in"
+  ],
+  "author": "Sebastian Gfeller",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-es2015-modules-amd": "^6.24.1",
+    "babel-preset-env": "^1.6.1"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "requirejs": "^2.3.5"
+  }
+}
