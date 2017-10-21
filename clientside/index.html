@@ -38,7 +38,6 @@
       });
       };
     </script>
-    <script src="static/Jquery.Dropdown.js"></script>
     <link rel="stylesheet" href="https://appsforoffice.microsoft.com/fabric/1.0/fabric.min.css">
     <link rel="stylesheet" href="https://appsforoffice.microsoft.com/fabric/1.0/fabric.components.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.2.13/dist/semantic.min.css">
@@ -48,8 +47,10 @@
   <div class="ui form">
     <div class="field">
       <label>Upload Release JSON</label>
-      <input type="file" name="release_json" />
+      <input type="file" id="release_json" name="release_json" />
     </div>
+    <p class="release-info"></p>
+    <button class="ui blue button insert-release">Insert Release</button>
   </div>
   </body>
 </html>

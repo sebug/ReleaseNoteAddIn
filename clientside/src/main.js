@@ -1,3 +1,5 @@
+import controller from "controller";
+
 window.InitializeOnceReady = function (reason) {
-    console.log('Ok for Release Note add-in');
+    controller.init(reason);
 };
