@@ -8,4 +8,7 @@ An add-in that allows to insert all the necessary info of a release into a Word 
 	az storage container create --name addinstatic
 	az storage blob upload --container-name addinstatic --file clientside/index.html --name index.html --content-type "text/html"
 	az storage container set-permission --name addinstatic --public-access blob
-	
+
+
+The add-in entry point is https://releasenoteaddin.azurewebsites.net
+
