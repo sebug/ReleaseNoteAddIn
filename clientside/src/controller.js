@@ -63,9 +63,9 @@ async function insertReleaseAfterHeading(previousReleaseHeading, releaseContent,
 	}
     }
     console.log('Just before');
-    current.insertOoxml(previousHeadingOOXML.value, 'After');
+    let headingParagraph = current.insertParagraph('Release v ' + releaseContent.Version, Word.InsertLocation.after);
     await context.sync();
-    console.log(headingResult);
+    console.log(headingParagraph);
     return true;
 }
 
