@@ -1,0 +1,22 @@
+{
+    "proxies": {
+        "staticFront": {
+            "matchCondition": {
+                "methods": [
+                    "GET"
+                ],
+                "route": "/"
+            },
+            "backendUri": "https://releasenoteaddin.blob.core.windows.net/addinstatic/index.html"
+        },
+        "otherFiles": {
+            "matchCondition": {
+                "methods": [
+                    "GET"
+                ],
+                "route": "/static/{*restOfPath}"
+            },
+            "backendUri": "https://releasenoteaddin.blob.core.windows.net/addinstatic/{restOfPath}"
+        }
+    }
+}
