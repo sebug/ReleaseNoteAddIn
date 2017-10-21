@@ -65,7 +65,9 @@ async function insertReleaseAfterHeading(previousReleaseHeading, releaseContent,
     console.log('Just before');
     let headingParagraph = current.insertParagraph('Release v ' + releaseContent.Version, Word.InsertLocation.after);
     await context.sync();
-    console.log(headingParagraph);
+    headingParagraph.insertBreak('Page', Word.InsertLocation.before);
+    headingParagraph.styleBuiltIn = 'Heading1';
+    await context.sync();
     return true;
 }
 
