@@ -99,6 +99,36 @@ async function insertWorkItemGroup(current, context, headingText, itemsGrouped, 
     return current;
 }
 
+async function insertGeneral(current, context, requiredLayers, previousLayers) {
+    let generalParagraph = current.insertParagraph('General', Word.InsertLocation.after);
+    generalParagraph.styleBuiltIn = 'Heading3';
+    await context.sync();
+    let followingLayers = generalParagraph.insertParagraph('This release requires the following layers to be updated:', Word.InsertLocation.after);
+    followingLayers.styleBuiltIn = 'Normal';
+    await context.sync();
+    current = followingLayers;
+    current = current.insertParagraph('If you are deploying on an environment not yet running version ' + previousLayers.PreviousVersion + ', please use the following packages for other layers (if applicable):', Word.InsertLocation.after);
+    current.styleBuiltIn = 'Normal';
+    await context.sync();
+    let ranges = current.getTextRanges([','], false);
+    await context.sync();
+    let firstRange = ranges.getFirst();
+    firstRange.load('font');
+    await context.sync();
+    firstRange.font.underline = 'Single';
+    await context.sync();
+    
+    return current;
+}
+
+async function insertInstallNotes(current, context, releaseContent) {
+    current = current.insertParagraph('Install Notes', Word.InsertLocation.after);
+    current.styleBuiltIn = 'Heading2';
+    await context.sync();
+    current = await insertGeneral(current, context, releaseContent.RequiredLayers, releaseContent.LayersFromVersion);
+    return current
+}
+
 function getWorkItemsUnderHeadings(releaseContent, type) {
     let filteredItems = releaseContent.SourceWorkItems.filter(wi => wi.Type === type);
 
@@ -176,6 +206,8 @@ async function insertReleaseAfterHeading(previousReleaseHeading, releaseContent,
     let wiCurrent = await insertWorkItemGroup(releaseDate, context, 'New Features & Improvements', changeRequests, 'Change Request');
 
     wiCurrent = await insertWorkItemGroup(wiCurrent, context, 'Bug Fixing', bugs, 'Bug');
+
+    let installNotes = await insertInstallNotes(wiCurrent, context, releaseContent)
     
     return true;
 }
