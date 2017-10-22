@@ -73,6 +73,32 @@ async function insertReleaseDate(current, context) {
     return releaseDateParagraph;
 }
 
+async function insertWorkItemGroup(current, context, headingText, itemsGrouped, itemType) {
+    if (itemsGrouped.length <= 0) {
+	// don't even bother with the section
+	return current;
+    }
+    let headingParagraph = current.insertParagraph(headingText, Word.InsertLocation.after);
+    await context.sync();
+    headingParagraph.styleBuiltIn = 'Heading2';
+    await context.sync();
+    current = headingParagraph;
+    for (let subGroup of itemsGrouped) {
+	let innerHeading = current.insertParagraph(subGroup.Heading, Word.InsertLocation.after);
+	innerHeading.styleBuiltIn = 'Heading3';
+	current = innerHeading;
+	await context.sync();
+	for (let wi of subGroup.Items) {
+	    let itemParagraph = current.insertParagraph(itemType + ' #' + wi.ID + ': ' + wi.Title, Word.InsertLocation.after);
+	    itemParagraph.styleBuiltIn = 'Normal';
+	    current = itemParagraph;
+	    await context.sync();
+	}
+	await context.sync();
+    }
+    return current;
+}
+
 function getWorkItemsUnderHeadings(releaseContent, type) {
     let filteredItems = releaseContent.SourceWorkItems.filter(wi => wi.Type === type);
 
@@ -146,6 +172,10 @@ async function insertReleaseAfterHeading(previousReleaseHeading, releaseContent,
     console.log(changeRequests);
     let bugs = getWorkItemsUnderHeadings(releaseContent, 'Bug');
     console.log(bugs);
+
+    let wiCurrent = await insertWorkItemGroup(releaseDate, context, 'New Features & Improvements', changeRequests, 'Change Request');
+
+    wiCurrent = await insertWorkItemGroup(wiCurrent, context, 'Bug Fixing', bugs, 'Bug');
     
     return true;
 }
