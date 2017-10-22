@@ -99,6 +99,33 @@ async function insertWorkItemGroup(current, context, headingText, itemsGrouped, 
     return current;
 }
 
+async function insertRequiredLayers(current, context, requiredLayers) {
+    current = current.insertParagraph(requiredLayers[0].Name, Word.InsertLocation.after);
+    await context.sync();
+    
+    let list = current.startNewList();
+    list.load();
+
+    await context.sync();
+
+    list.setLevelBullet(0, 'Custom','-'.charCodeAt(0));
+
+    await context.sync();
+
+    let first = true;
+    for (let layer of requiredLayers) {
+	if (first) {
+	    first = false;
+	} else {
+	    list.insertParagraph(layer.Name, Word.InsertLocation.end);
+	}
+    }
+
+    await context.sync();
+    
+    return list;
+}
+
 async function insertGeneral(current, context, requiredLayers, previousLayers) {
     let generalParagraph = current.insertParagraph('General', Word.InsertLocation.after);
     generalParagraph.styleBuiltIn = 'Heading3';
@@ -107,6 +134,9 @@ async function insertGeneral(current, context, requiredLayers, previousLayers) {
     followingLayers.styleBuiltIn = 'Normal';
     await context.sync();
     current = followingLayers;
+
+    current = await insertRequiredLayers(current, context, requiredLayers);
+    
     current = current.insertParagraph('If you are deploying on an environment not yet running version ' + previousLayers.PreviousVersion + ', please use the following packages for other layers (if applicable):', Word.InsertLocation.after);
     current.styleBuiltIn = 'Normal';
     await context.sync();
