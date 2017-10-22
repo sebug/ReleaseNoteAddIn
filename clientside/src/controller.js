@@ -35,10 +35,86 @@ function compareVersions(a, b) {
     return 0;
 }
 
+async function insertReleaseHeading(current, context, version) {
+    let headingParagraph = current.insertParagraph('Release v ' + version, Word.InsertLocation.after);
+    await context.sync();
+    headingParagraph.insertBreak('Page', Word.InsertLocation.before);
+    headingParagraph.styleBuiltIn = 'Heading1';
+    await context.sync();
+    return headingParagraph;
+}
+
+const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+];
+
+async function insertReleaseDate(current, context) {
+    const currentDate = new Date();
+    
+    let releaseDateParagraph = current.insertParagraph(
+	'Release date: ' +
+	    months[currentDate.getMonth()] +
+	    ' ' + currentDate.getDate() + ', ' + currentDate.getFullYear()
+	, Word.InsertLocation.after);
+    await context.sync();
+    releaseDateParagraph.styleBuiltIn = 'Normal';
+    await context.sync();
+    return releaseDateParagraph;
+}
+
+function getWorkItemsUnderHeadings(releaseContent, type) {
+    let filteredItems = releaseContent.SourceWorkItems.filter(wi => wi.Type === type);
+
+    let mappingDict = {};
+    releaseContent.AreaPathMappings.forEach(apm => {
+	mappingDict[apm.AreaPath] = apm.Title;
+    });
+    let getAreaPathHeading = wi => {
+	if (mappingDict[wi.AreaPath]) {
+	    return mappingDict[wi.AreaPath];
+	} else {
+	    let split = wi.AreaPath.split('\\');
+	    return split[split.length - 1];
+	}
+    };
+
+    let withHeading = filteredItems.map(wi => {
+	return {
+	    ID: wi.ID,
+	    Title: wi.Title,
+	    Heading: getAreaPathHeading(wi)
+	};
+    });
+
+    let titlesSeen = {};
+    let headedList = [];
+    withHeading.forEach(function (wi) {
+	if (!titlesSeen[wi.Heading]) {
+	    titlesSeen[wi.Heading] = [];
+	    headedList.push({
+		Heading: wi.Heading,
+		Items: titlesSeen[wi.Heading]
+	    });
+	}
+	titlesSeen[wi.Heading].push(wi);
+    });
+    
+    return headedList;
+}
+
 async function insertReleaseAfterHeading(previousReleaseHeading, releaseContent, context) {
     // previous heading OOXML
-    let previousHeadingOOXML = previousReleaseHeading.getOoxml();
-    await context.sync();
     console.log('inserting release after heading...');
     let current = previousReleaseHeading;
     let next = current.getNextOrNullObject();
@@ -62,12 +138,15 @@ async function insertReleaseAfterHeading(previousReleaseHeading, releaseContent,
 	    }
 	}
     }
-    console.log('Just before');
-    let headingParagraph = current.insertParagraph('Release v ' + releaseContent.Version, Word.InsertLocation.after);
-    await context.sync();
-    headingParagraph.insertBreak('Page', Word.InsertLocation.before);
-    headingParagraph.styleBuiltIn = 'Heading1';
-    await context.sync();
+    
+    let headingParagraph = await insertReleaseHeading(current, context, releaseContent.Version);
+    let releaseDate = await insertReleaseDate(headingParagraph, context);
+
+    let changeRequests = getWorkItemsUnderHeadings(releaseContent, 'Change Request');
+    console.log(changeRequests);
+    let bugs = getWorkItemsUnderHeadings(releaseContent, 'Bug');
+    console.log(bugs);
+    
     return true;
 }
 
